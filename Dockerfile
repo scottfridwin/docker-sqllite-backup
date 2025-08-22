@@ -1,14 +1,12 @@
 FROM alpine:3.20
 
-# Install dependencies: rdiff-backup, sqlite3, cron, bash, curl (for healthchecks.io)
+# Install dependencies
 RUN apk add --no-cache rdiff-backup sqlite bash curl dcron
 
-# Copy backup scripts
+# Copy scripts
 COPY backup.sh /usr/local/bin/backup.sh
-COPY crontab.txt /etc/crontabs/root
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
-# Make script executable
-RUN chmod +x /usr/local/bin/backup.sh
+RUN chmod +x /usr/local/bin/backup.sh /usr/local/bin/entrypoint.sh
 
-# Run cron in foreground
-CMD ["crond", "-f", "-l", "2"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
