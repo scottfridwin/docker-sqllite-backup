@@ -15,10 +15,14 @@ if [ -z "$BACKUP_SRC" ] || [ -z "$BACKUP_DEST" ]; then
     exit 1
 fi
 
+# Create temporary directory for rdiff-backup
+export TMPDIR=/tmp/rdiff-backup-tmp
+mkdir -p $TMPDIR
+
 echo "[INFO] Starting backup of $BACKUP_SRC -> $BACKUP_DEST"
 
 # Run backup
-rdiff-backup "$BACKUP_SRC" "$BACKUP_DEST"
+rdiff-backup --new --api-version 201 "$BACKUP_SRC" "$BACKUP_DEST"
 RET=$?
 if [ $RET -ne 0 ]; then
     echo "[ERROR] rdiff-backup failed with code $RET"

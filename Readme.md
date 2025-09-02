@@ -15,36 +15,7 @@ This project provides a simple containerized solution for backing up a SQLite da
 
 ## Usage
 
-### 1. Build the Docker Image
-
-```sh
-docker build -t sqlite-backup .
-```
-
-### 2. Run the Container
-
-Mount your SQLite database and backup destination as volumes:
-
-```sh
-docker run -d \
-  -v /path/to/your/database:/data:ro \
-  -v /path/to/backup/location:/backups \
-  -e BACKUP_SRC=/data \
-  -e BACKUP_DEST=/backups \
-  -e RETENTION=6M \
-  -e CRON_SCHEDULE="0 2 * * *" \
-  --name sqlite-backup \
-  sqlite-backup
-```
-
-> **Note:**
->
-> * The database is mounted **read-only** for safety.
-> * The backup destination must be **writable** and ideally persistent (local disk or network mount).
-
----
-
-### 3. Environment Variables
+### Environment Variables
 
 | Variable        | Description                                                                       | Default     |
 | --------------- | --------------------------------------------------------------------------------- | ----------- |
@@ -56,37 +27,74 @@ docker run -d \
 
 ---
 
-### 4. Scripts
+#### Docker Run Example
+
+```sh
+docker run -d \
+  -v /path/to/your/database:/data:ro \
+  -v /path/to/backup/location:/backups \
+  -e BACKUP_SRC=/data \
+  -e BACKUP_DEST=/backups \
+  -e RETENTION=6M \
+  -e CRON_SCHEDULE="0 2 * * *" \
+  --name sqlite-backup \
+  fridwin/sqlite-backup
+```
+
+#### Docker Compose Example
+
+```yaml
+services:
+  sqlite-backup:
+    image: fridwin/sqlite-backup
+    container_name: sqlite-backup
+    environment:
+      - TZ=${TIME_ZONE}
+      - BACKUP_SRC=/data
+      - BACKUP_DEST=/backups
+      - RETENTION=6M
+      - CRON_SCHEDULE=0 */6 * * *
+    volumes:
+      - /path/to/database:/data:ro
+      - /path/to/backups:/backups
+    restart: unless-stopped
+```
+
+> **Notes:**
+>
+> * The database is mounted **read-only** for safety.
+> * The backup destination must be **writable** and ideally persistent (local disk or network mount).
+
+---
+
+### Scripts
+
+Scripts are provided inside the container to allow for automated or manual execution of backup-related tasks.
 
 * **`backup.sh`**: Performs backup and prunes old increments.
 * **`restore.sh`**: Restores backup to a specified location.
 * **`list_backups.sh`**: Lists available restore points.
 * **`healthcheck.sh`**: Checks backup status, cron, and optionally backup age.
 
-> **Logs:**
->
-> * Backup logs → `/var/log/backup.log`
-> * Healthcheck logs → `/var/log/backup_health.log`
+#### Manual backup
 
----
+```sh
+docker exec -e BACKUP_PATH=/backups sqlite-backup /backup.sh
+```
 
-### 5. List Available Backups
+#### List available backups
 
 ```sh
 docker exec -e BACKUP_PATH=/backups sqlite-backup /list_backups.sh
 ```
 
----
-
-### 6. Restore a Backup
-
-Restore the latest backup:
+#### Restore the latest backup
 
 ```sh
 docker exec -e BACKUP_PATH=/backups -e RESTORE_PATH=/restore/path sqlite-backup /restore.sh
 ```
 
-Restore a specific date:
+#### Restore a specific backup
 
 ```sh
 docker exec -e BACKUP_PATH=/backups -e RESTORE_PATH=/restore/path -e RESTORE_DATE="2025-09-01T02:00:00" sqlite-backup /restore.sh
@@ -96,7 +104,7 @@ docker exec -e BACKUP_PATH=/backups -e RESTORE_PATH=/restore/path -e RESTORE_DAT
 
 ---
 
-### 7. Healthcheck
+### Healthcheck
 
 The container includes a healthcheck that verifies:
 
@@ -106,25 +114,6 @@ The container includes a healthcheck that verifies:
 
 ```yaml
 HEALTHCHECK --interval=5m --timeout=10s --start-period=1m CMD /healthcheck.sh
-```
-
----
-
-### 8. Docker Compose Example
-
-```yaml
-services:
-  sqlite-backup:
-    image: sqlite-backup
-    environment:
-      BACKUP_SRC: /data
-      BACKUP_DEST: /backups
-      RETENTION: 6M
-      CRON_SCHEDULE: "0 2 * * *"
-      MAX_AGE: 21600   # Optional, 6h
-    volumes:
-      - /path/to/database:/data:ro
-      - /path/to/backups:/backups
 ```
 
 ---
