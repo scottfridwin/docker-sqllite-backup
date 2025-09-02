@@ -1,4 +1,4 @@
-FROM alpine:3.20
+FROM alpine:3.20.1
 
 # Install rdiff-backup and cron
 RUN apk add --no-cache rdiff-backup bash curl tzdata
