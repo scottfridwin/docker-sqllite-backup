@@ -1,12 +1,22 @@
 FROM alpine:3.20
 
-# Install dependencies
-RUN apk add --no-cache rdiff-backup sqlite bash curl dcron
+# Install rdiff-backup and cron
+RUN apk add --no-cache rdiff-backup bash curl tzdata
 
 # Copy scripts
-COPY backup.sh /usr/local/bin/backup.sh
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY backup.sh /backup.sh
+COPY restore.sh /restore.sh
+COPY list_backups.sh /list_backups.sh
+COPY entrypoint.sh /entrypoint.sh
+COPY healthcheck.sh /healthcheck.sh
+RUN chmod +x /backup.sh /restore.sh /list_backups.sh /entrypoint.sh /healthcheck.sh
 
-RUN chmod +x /usr/local/bin/backup.sh /usr/local/bin/entrypoint.sh
+# Environment variables
+ENV BACKUP_SRC=/data \
+    BACKUP_DEST=/backups \
+    RETENTION=6M \
+    CRON_SCHEDULE="0 2 * * *"
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+HEALTHCHECK --interval=5m --timeout=10s --start-period=1m CMD /healthcheck.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

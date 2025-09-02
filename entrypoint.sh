@@ -1,17 +1,18 @@
-#!/bin/bash
-set -euo pipefail
+#!/bin/sh
+set -e
 
-# Required vars
-: "${DB_PATH:?Must set DB_PATH}"
-: "${BACKUP_DEST:?Must set BACKUP_DEST}"
-: "${BACKUP_TYPE:?Must set BACKUP_TYPE (incremental|full)}"
-: "${RETENTION:?Must set RETENTION (e.g. 30D, 6M)}"
-: "${SCHEDULE:?Must set SCHEDULE (cron format, e.g. '0 */6 * * *')}"
+# Default cron schedule (can be overridden)
+: "${CRON_SCHEDULE:=0 2 * * *}"  # Every day at 2 AM by default
 
-CRON_FILE="/etc/crontabs/root"
+CRON_FILE=/etc/crontabs/root
 
-echo "[INFO] Configuring backup schedule..."
-echo "$SCHEDULE BACKUP_TYPE=$BACKUP_TYPE /usr/local/bin/backup.sh" > "$CRON_FILE"
+# Write cron job
+echo "$CRON_SCHEDULE BACKUP_SRC=$BACKUP_SRC BACKUP_DEST=$BACKUP_DEST RETENTION=$RETENTION /backup.sh >> /var/log/backup.log 2>&1" > $CRON_FILE
 
-echo "[INFO] Starting cron with schedule: $SCHEDULE"
-exec crond -f -l 2
+echo "[INFO] Cron job installed: $CRON_SCHEDULE"
+
+# Ensure health dir exists
+mkdir -p /health
+
+# Start cron in foreground
+exec crond -f -L /dev/stdout
