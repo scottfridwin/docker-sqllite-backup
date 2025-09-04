@@ -10,6 +10,8 @@ COPY list_backups.sh /list_backups.sh
 COPY entrypoint.sh /entrypoint.sh
 COPY healthcheck.sh /healthcheck.sh
 RUN chmod +x /backup.sh /restore.sh /list_backups.sh /entrypoint.sh /healthcheck.sh
+RUN mkdir -p /health
+RUN chmod a+rwx /health
 
 # Environment variables
 ENV BACKUP_SRC=/data \

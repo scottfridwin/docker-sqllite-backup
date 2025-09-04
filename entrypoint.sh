@@ -1,12 +1,13 @@
 #!/bin/sh
 set -e
 
-: "${CRON_SCHEDULE:=0 2 * * *}"  # Default
+: "${CRON_SCHEDULE:=0 2 * * *}"  # default schedule
 
-# Write cron job to current user's crontab
-echo "$CRON_SCHEDULE BACKUP_SRC=$BACKUP_SRC BACKUP_DEST=$BACKUP_DEST RETENTION=$RETENTION /backup.sh >> /var/log/backup.log 2>&1" | crontab -
+CRON_FILE=/tmp/cronjob
 
+# Write cron job to a file
+echo "$CRON_SCHEDULE BACKUP_SRC=$BACKUP_SRC BACKUP_PATH=$BACKUP_PATH RETENTION=$RETENTION /backup.sh >> /var/log/backup.log 2>&1" > $CRON_FILE
 echo "[INFO] Cron job installed: $CRON_SCHEDULE"
 
-mkdir -p /health /var/log
-exec crond -f -L /dev/stdout
+# Start cron, pointing to the temp directory
+exec crond -f -L /dev/stdout -c /tmp
