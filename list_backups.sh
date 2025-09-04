@@ -7,4 +7,4 @@ if [ -z "$BACKUP_PATH" ]; then
 fi
 
 echo "[INFO] Listing available restore points in $BACKUP_PATH"
-rdiff-backup --list-increments "$BACKUP_PATH"
+rdiff-backup --list-increments "$BACKUP_PATH/sqllite-backup"

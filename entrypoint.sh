@@ -6,7 +6,7 @@ set -e
 CRON_FILE=/tmp/cronjob
 
 # Write cron job to a file
-echo "$CRON_SCHEDULE BACKUP_SRC=$BACKUP_SRC BACKUP_DEST=$BACKUP_DEST RETENTION=$RETENTION /backup.sh >> /var/log/backup.log 2>&1" > $CRON_FILE
+echo "$CRON_SCHEDULE BACKUP_SRC=$BACKUP_SRC BACKUP_PATH=$BACKUP_PATH RETENTION=$RETENTION /backup.sh >> /var/log/backup.log 2>&1" > $CRON_FILE
 echo "[INFO] Cron job installed: $CRON_SCHEDULE"
 
 # Start cron, pointing to the temp directory

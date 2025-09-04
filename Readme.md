@@ -20,10 +20,14 @@ This project provides a simple containerized solution for backing up a SQLite da
 | Variable        | Description                                                                       | Default     |
 | --------------- | --------------------------------------------------------------------------------- | ----------- |
 | `BACKUP_SRC`    | Path to source data (file or directory)                                           | `/data`     |
-| `BACKUP_DEST`   | Path to backup repository                                                         | `/backups`  |
+| `BACKUP_PATH`   | Path to backup repository                                                         | `/backups`  |
 | `RETENTION`     | How long to keep old backups (e.g., `6M` for 6 months)                            | `6M`        |
 | `CRON_SCHEDULE` | Cron schedule for backups                                                         | `0 2 * * *` |
 | `MAX_AGE`       | Optional. Maximum allowed seconds since last backup before container is unhealthy | (unset)     |
+
+> **Notes:**
+>
+> * A subdirectory named "sqllite-backup" will be created inside the directory specified by `BACKUP_PATH`.
 
 ---
 
@@ -34,7 +38,7 @@ docker run -d \
   -v /path/to/your/database:/data:ro \
   -v /path/to/backup/location:/backups \
   -e BACKUP_SRC=/data \
-  -e BACKUP_DEST=/backups \
+  -e BACKUP_PATH=/backups \
   -e RETENTION=6M \
   -e CRON_SCHEDULE="0 2 * * *" \
   --name sqlite-backup \
@@ -51,7 +55,7 @@ services:
     environment:
       - TZ=${TIME_ZONE}
       - BACKUP_SRC=/data
-      - BACKUP_DEST=/backups
+      - BACKUP_PATH=/backups
       - RETENTION=6M
       - CRON_SCHEDULE=0 */6 * * *
     volumes:

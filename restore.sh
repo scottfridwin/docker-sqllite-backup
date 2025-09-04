@@ -9,10 +9,10 @@ fi
 # If RESTORE_DATE is not set, restore latest
 if [ -n "$RESTORE_DATE" ]; then
   echo "[INFO] Restoring backup from $RESTORE_DATE into $RESTORE_PATH"
-  rdiff-backup -r "$RESTORE_DATE" "$BACKUP_PATH" "$RESTORE_PATH"
+  rdiff-backup -r "$RESTORE_DATE" "$BACKUP_PATH/sqllite-backup" "$RESTORE_PATH"
 else
   echo "[INFO] Restoring latest backup into $RESTORE_PATH"
-  rdiff-backup -r now "$BACKUP_PATH" "$RESTORE_PATH"
+  rdiff-backup -r now "$BACKUP_PATH/sqllite-backup" "$RESTORE_PATH"
 fi
 
 echo "[INFO] Restore complete"
