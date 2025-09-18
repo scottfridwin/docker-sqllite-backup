@@ -23,7 +23,6 @@ This project provides a simple containerized solution for backing up a SQLite da
 | `BACKUP_PATH`   | Path to backup repository                                                         | `/backups`  |
 | `RETENTION`     | How long to keep old backups (e.g., `6M` for 6 months)                            | `6M`        |
 | `CRON_SCHEDULE` | Cron schedule for backups                                                         | `0 2 * * *` |
-| `MAX_AGE`       | Optional. Maximum allowed seconds since last backup before container is unhealthy | (unset)     |
 
 > **Notes:**
 >
@@ -114,7 +113,6 @@ The container includes a healthcheck that verifies:
 
 1. Cron is running
 2. The last backup completed successfully
-3. Optionally, the last backup is recent (if `MAX_AGE` is set)
 
 ```yaml
 HEALTHCHECK --interval=5m --timeout=10s --start-period=1m CMD /healthcheck.sh
